@@ -12,7 +12,7 @@ echo "    ░███   ░███  ███    ░███"
 echo "    ░░████████  ░░█████████ "
 echo "     ░░░░░░░░    ░░░░░░░░░  "
 echo
-echo "  Universal Update Script (US)"
+echo "      Update Script (US)"
 echo
 echo "Select your system:"
 echo "1) Arch based"
