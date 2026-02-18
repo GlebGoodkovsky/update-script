@@ -39,19 +39,27 @@ while true; do
 done 2>/dev/null &
 
 update_arch() {
-    echo "[1/3] Updating official Arch repositories..."
+    echo "[1/4] Updating official repositories..."
     sudo pacman -Syu --noconfirm
 
-    echo "[2/3] Updating AUR packages via yay..."
+    echo "[2/4] Updating AUR packages via yay..."
     if command -v yay >/dev/null 2>&1; then
         yay -Sua --noconfirm
     else
         echo "yay not installed — skipping AUR updates."
     fi
 
-    echo "[3/3] Removing orphaned packages..."
-    if [[ -n $(pacman -Qtdq) ]]; then
-        sudo pacman -Rns $(pacman -Qtdq) --noconfirm
+    echo "[3/4] Updating Flatpak apps..."
+    if command -v flatpak >/dev/null 2>&1; then
+        flatpak update -y
+    else
+        echo "Flatpak not installed — skipping."
+    fi
+
+    echo "[4/4] Removing orphaned packages..."
+    orphans=$(pacman -Qtdq)
+    if [[ -n "$orphans" ]]; then
+        sudo pacman -Rns $orphans --noconfirm
     else
         echo "Nothing to clean."
     fi
