@@ -66,13 +66,20 @@ update_arch() {
 }
 
 update_ubuntu() {
-    echo "[1/3] Updating package lists and upgrading packages..."
+    echo "[1/4] Updating package lists and upgrading packages..."
     sudo apt update && sudo apt upgrade -y
 
-    echo "[2/3] Removing unused packages..."
+    echo "[2/4] Updating Flatpak apps..."
+    if command -v flatpak >/dev/null 2>&1; then
+        flatpak update -y
+    else
+        echo "Flatpak not installed — skipping."
+    fi
+
+    echo "[3/4] Removing unused packages..."
     sudo apt autoremove -y
 
-    echo "[3/3] Cleaning package cache..."
+    echo "[4/4] Cleaning package cache..."
     sudo apt autoclean -y
 }
 
