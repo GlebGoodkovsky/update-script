@@ -29,40 +29,42 @@ if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
     exit 0
 fi
 
-# Only ask for sudo if updating
-sudo -v
+# Prompt sudo password upfront
+sudo true
 
-# Keep sudo alive while the script runs
+# Keep sudo alive (prompts when expired)
 while true; do
-    sudo -n true
-    sleep 60
-    kill -0 "$$" || exit
-done 2>/dev/null &
+    if ! sudo -n true 2>/dev/null; then
+        sudo true
+    fi
+    sleep 300
+    kill -0 "$$" 2>/dev/null || exit
+done &
 
 update_arch_binary() {
     echo "[1/2] Updating official repositories (binaries only)..."
-    sudo pacman -Syu
+    yes | sudo pacman -Syu
     
     echo "[2/2] Removing orphans..."
     orphans=$(pacman -Qtdq)
-    [[ -n "$orphans" ]] && sudo pacman -Rns $orphans
+    [[ -n "$orphans" ]] && yes | sudo pacman -Rns $orphans
 }
 
 update_arch_full() {
     echo "[1/3] Full system update via yay..."
-    yay -Syu
+    yay -Syu --noconfirm
     
     echo "[2/3] Flatpak..."
     command -v flatpak >/dev/null 2>&1 && flatpak update -y
     
     echo "[3/3] Orphans..."
     orphans=$(pacman -Qtdq)
-    [[ -n "$orphans" ]] && sudo pacman -Rns $orphans
+    [[ -n "$orphans" ]] && yes | sudo pacman -Rns $orphans
 }
 
 update_ubuntu() {
     echo "[1/4] Updating package lists and upgrading packages..."
-    sudo apt update && sudo apt upgrade -y
+    sudo apt update && yes | sudo apt upgrade -y
 
     echo "[2/4] Updating Flatpak apps..."
     if command -v flatpak >/dev/null 2>&1; then
