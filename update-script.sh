@@ -15,8 +15,9 @@ echo
 echo "      Update Script (US)"
 echo
 echo "Select your system:"
-echo "1) Arch based"
-echo "2) Ubuntu based"
+echo "1) Arch based (binaries only)"
+echo "2) Arch based (with AUR compiling)"
+echo "3) Ubuntu based"
 echo "q) Quit"
 echo
 
@@ -38,31 +39,25 @@ while true; do
     kill -0 "$$" || exit
 done 2>/dev/null &
 
-update_arch() {
-    echo "[1/4] Updating official repositories..."
-    sudo pacman -Syu --noconfirm
-
-    echo "[2/4] Updating AUR packages via yay..."
-    if command -v yay >/dev/null 2>&1; then
-        yay -Sua --noconfirm
-    else
-        echo "yay not installed — skipping AUR updates."
-    fi
-
-    echo "[3/4] Updating Flatpak apps..."
-    if command -v flatpak >/dev/null 2>&1; then
-        flatpak update -y
-    else
-        echo "Flatpak not installed — skipping."
-    fi
-
-    echo "[4/4] Removing orphaned packages..."
+update_arch_binary() {
+    echo "[1/2] Updating official repositories (binaries only)..."
+    sudo pacman -Syu
+    
+    echo "[2/2] Removing orphans..."
     orphans=$(pacman -Qtdq)
-    if [[ -n "$orphans" ]]; then
-        sudo pacman -Rns $orphans --noconfirm
-    else
-        echo "Nothing to clean."
-    fi
+    [[ -n "$orphans" ]] && sudo pacman -Rns $orphans
+}
+
+update_arch_full() {
+    echo "[1/3] Full system update via yay..."
+    yay -Syu
+    
+    echo "[2/3] Flatpak..."
+    command -v flatpak >/dev/null 2>&1 && flatpak update -y
+    
+    echo "[3/3] Orphans..."
+    orphans=$(pacman -Qtdq)
+    [[ -n "$orphans" ]] && sudo pacman -Rns $orphans
 }
 
 update_ubuntu() {
@@ -84,18 +79,10 @@ update_ubuntu() {
 }
 
 case "$choice" in
-    1)
-        echo "Running Arch update..."
-        update_arch
-        ;;
-    2)
-        echo "Running Ubuntu / Pop!_OS update..."
-        update_ubuntu
-        ;;
-    *)
-        echo "Invalid option."
-        exit 1
-        ;;
+    1) update_arch_binary ;;
+    2) update_arch_full ;;
+    3) update_ubuntu ;;
+    *) echo "Invalid"; exit 1 ;;
 esac
 
 echo
