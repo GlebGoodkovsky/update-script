@@ -1,20 +1,20 @@
 # Update Script (US)
 
-A simple versatile Bash script designed to automate system update across Linux distros. Provides a unified interface to update packages, handle AUR dependencies, and perform system cleanup.
+A simple versatile Bash script designed to automate system updates across Linux distros. Provides a unified interface with two Arch modes (fast vs full) and Ubuntu support.
 
 ---
 
 ## Features  
-- **Multi-Distro Support:** Dedicated workflows for Arch-based and Ubuntu/Debian-based systems.
-- **Sudo Management:** Automatically keeps your `sudo` session alive in the background so you don't have to re-enter your password during long updates.
-- **Arch-based Workflow:** 
-    - Updates official repositories via `pacman`.
-    - Updates AUR packages via `yay` (if installed).
-    - Automatically detects and removes orphaned dependencies.
+- **Multi-Distro Support:** Two Arch modes + Ubuntu/Debian workflows
+- **Sudo Management:** Automatically keeps your `sudo` session alive during long updates
+- **Arch (binaries only):**
+  - `pacman -Syu` + orphan cleanup (fast, no compiling)
+- **Arch (full compile):**
+  - `yay -Syu` + Flatpak + orphans (complete system refresh)
 - **Ubuntu-based Workflow:**
-    - Updates package lists and upgrades all software via `apt`.
-    - Runs `autoremove` to delete unnecessary packages.
-    - Runs `autoclean` to clear out the local repository of retrieved package files.
+  - Updates package lists and upgrades via `apt`
+  - Removes unused packages with `autoremove`
+  - Cleans package cache with `autoclean`
 
 ---
 
@@ -52,13 +52,20 @@ Run the script:
 
 
 ### Menu Options:
-- `1`: **Arch based** — Runs pacman, yay, and orphan cleanup.
-- `2`: **Ubuntu based** — Runs apt update, upgrade, autoremove, and autoclean.
-- `q`: **Quit** — Exit the script safely.
+- `1`: **Arch (binaries only)** — `pacman -Syu` + orphan cleanup (fast, no compiling)
+- `2`: **Arch (with AUR compiling)** — `yay -Syu` + Flatpak + orphan cleanup (full system)
+- `3`: **Ubuntu based** — `apt update/upgrade + autoremove + autoclean`
+- `q`: **Quit** — Exit safely
 
 ---
 
 ## Warnings and Reminders
+
+### AUR Compiling (Option 2 only)
+**Expect high CPU usage:** AUR packages compile from source:
+- Large packages (browsers, IDEs) can take 1-2+ hours
+- Normal for rolling releases after library upgrades
+- Use Option 1 daily, Option 2 weekly/monthly
 
 ### AUR (Arch User Repository)
 AUR packages are user-maintained. While this script automates the update process via `yay`, remember:
